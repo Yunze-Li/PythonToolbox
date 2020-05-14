@@ -1,18 +1,25 @@
-from typing import List
-
-
 class Solution:
-    def findJudge(self, N: int, trust: List[List[int]]) -> int:
-        candidates = [True] * N
-        count = [0] * N
-        for trust_link in trust:
-            candidates[trust_link[0] - 1] = False
-            count[trust_link[1] - 1] += 1
-        for i in range(N):
-            if candidates[i] == True and count[i] == N - 1:
-                return i + 1
-        return -1
+    def removeKdigits(self, num: str, k: int) -> str:
+        current = num
+        for i in range(k):
+            current = self.helper(current)
+            while current.startswith('0'):
+                current = current[1:]
+        if len(current) == 0:
+            return '0'
+        else:
+            return current
+
+    def helper(self, num: str) -> str:
+        if len(num) > 1 and num[1] == '0':
+            return num[1:]
+        for index in range(1, len(num)):
+            if ord(num[index]) > ord(num[index - 1]):
+                num = num[:index] + num[index + 1:]
+                return num
+        num = num[1:]
+        return num
 
 
 if __name__ == '__main__':
-    print(Solution().findJudge(4, [[1, 3], [1, 4], [2, 3], [2, 4], [4, 3]]))
+    print(Solution().removeKdigits("10200", 2))
