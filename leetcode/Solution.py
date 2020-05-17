@@ -1,25 +1,21 @@
-class Solution:
-    def removeKdigits(self, num: str, k: int) -> str:
-        current = num
-        for i in range(k):
-            current = self.helper(current)
-            while current.startswith('0'):
-                current = current[1:]
-        if len(current) == 0:
-            return '0'
-        else:
-            return current
+from typing import List
 
-    def helper(self, num: str) -> str:
-        if len(num) > 1 and num[1] == '0':
-            return num[1:]
-        for index in range(1, len(num)):
-            if ord(num[index]) > ord(num[index - 1]):
-                num = num[:index] + num[index + 1:]
-                return num
-        num = num[1:]
-        return num
+
+class Solution:
+    def maxSubarraySumCircular(self, A: List[int]) -> int:
+        current_max = 0
+        total_max = A[0]
+        current_min = 0
+        total_min = A[0]
+        total_sum = 0
+        for num in A:
+            current_max = max(current_max + num, num)
+            total_max = max(total_max, current_max)
+            current_min = min(current_min + num, num)
+            total_min = min(total_min, current_min)
+            total_sum += num
+        return max(total_max, total_sum - total_min) if total_max > 0 else total_max
 
 
 if __name__ == '__main__':
-    print(Solution().removeKdigits("10200", 2))
+    print(Solution().maxSubarraySumCircular([1, -2, 3, -2]))
