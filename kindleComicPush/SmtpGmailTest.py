@@ -1,10 +1,12 @@
 import smtplib
 import sys
 
+from kindleComicPush.constants.Constants import *
+
 
 # A simple test to see if the gmail address SMTP service is setup successfully
 def smtp_gmail_test(sender_address: str, sender_password: str):
-    mail_host = "smtp.gmail.com"  # 设置服务器
+    mail_host = GMAIL_EMAIL_SERVER  # 设置服务器
     receivers = [sender_address]  # 接收邮件方
     message = "test_message"
     try:

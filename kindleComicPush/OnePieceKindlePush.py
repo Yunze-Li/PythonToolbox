@@ -10,6 +10,8 @@ from email.mime.multipart import MIMEMultipart
 import fitz
 import requests
 
+from kindleComicPush.constants.Constants import *
+
 
 class OnePieceKindlePush:
 
@@ -18,10 +20,10 @@ class OnePieceKindlePush:
 
         # 邮件设置,默认不开启邮件发送
         self.email = email  # 推送发邮件需要传入参数email=True
-        self.mail_host = "smtp.gmail.com"  # 设置服务器
-        self.mail_user = "macforpersonal@gmail.com"  # 用户名
-        self.mail_pass = "ljyixiqaqtqsmxnr"  # 密码
-        self.receivers = ['503867579@kindle.com']  # 接收邮件，可设置为你的QQ邮箱或者其他邮箱
+        self.mail_host = GMAIL_EMAIL_SERVER  # 设置服务器
+        self.mail_user = EMAIL_ADDRESS  # 用户名
+        self.mail_pass = EMAIL_PASSWORD  # 密码
+        self.receivers = [RECEIVER_EMAIL_PASSWORD]  # 接收邮件，可设置为你的QQ邮箱或者其他邮箱
 
         # 文件地址设置
         self.path = './海贼王'

@@ -2,20 +2,15 @@ from typing import List
 
 
 class Solution:
-    def maxSubarraySumCircular(self, A: List[int]) -> int:
-        current_max = 0
-        total_max = A[0]
-        current_min = 0
-        total_min = A[0]
-        total_sum = 0
-        for num in A:
-            current_max = max(current_max + num, num)
-            total_max = max(total_max, current_max)
-            current_min = min(current_min + num, num)
-            total_min = min(total_min, current_min)
-            total_sum += num
-        return max(total_max, total_sum - total_min) if total_max > 0 else total_max
-
+    def canFinish(self, numCourses: int, prerequisites: List[List[int]]) -> bool:
+        route, in_count, out_count = {}, [0] * numCourses, [0] * numCourses
+        for course in range(numCourses):
+            route[course] = []
+        for prerequisite in prerequisites:
+            in_count[prerequisite[1]] += 1
+            out_count[prerequisite[0]] += 1
+            route[prerequisite[0]].append(prerequisite[1])
+        
 
 if __name__ == '__main__':
-    print(Solution().maxSubarraySumCircular([1, -2, 3, -2]))
+    print(Solution().canFinish(5, [0, 1], [1, 2], [1, 4], [2, 3], [4, 3]))
