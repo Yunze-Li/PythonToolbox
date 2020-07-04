@@ -43,7 +43,7 @@ def parse_one_page(html):
         comment_match = re.findall(comment_pattern, matched)
         line = matched if len(comment_match) == 0 else comment_match[0][0] + ': ' + comment_match[0][1]
         print('抓取内容: ' + line)
-        with open('result.txt', 'a', encoding='utf-8') as fp:
+        with open('../kindleComicPush/result.txt', 'a', encoding='utf-8') as fp:
             fp.writelines(str(line) + '\n')
 
 
@@ -51,7 +51,7 @@ if __name__ == '__main__':
     # 删除result.txt文件（如果存在）
     result_file = Path('result.txt')
     if result_file.is_file():
-        os.remove('result.txt')
+        os.remove('../kindleComicPush/result.txt')
 
     # 默认 抓取30页 可以传入初始参数调整, 比如如果抓取100页就用：
     # python3 WeiboScraper.py 100
