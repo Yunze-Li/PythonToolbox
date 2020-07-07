@@ -1,22 +1,21 @@
-from leetcode import Helper
-from leetcode.Helper import TreeNode
+from typing import List
 
 
 class Solution:
-    def countNodes(self, root: TreeNode) -> int:
-        if root is None:
-            return 0
-        queue, result = [root], 0
-        while len(queue) > 0:
-            current = queue.pop(0)
-            result += 1
-            if current.left is not None:
-                queue.append(current.left)
-            if current.right is not None:
-                queue.append(current.right)
-        return result
+    def plusOne(self, digits: List[int]) -> List[int]:
+        add_one = 1
+        for index in range(len(digits) - 1, -1, -1):
+            current = digits[index] + add_one
+            if current < 10:
+                digits[index] = current
+                add_one = 0
+            else:
+                digits[index] = 0
+                add_one = 1
+        if add_one == 1:
+            digits.insert(0, add_one)
+        return digits
 
 
 if __name__ == '__main__':
-    tree = Helper.createTree([1, 2, 3, 4, 5, 6])
-    print(Solution().countNodes(tree))
+    print(Solution().plusOne([9, 9]))
