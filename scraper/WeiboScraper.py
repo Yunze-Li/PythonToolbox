@@ -35,14 +35,24 @@ def parse_one_page(html):
     :param html: 抓取出的html内容
     """
     # 用正则表达式 match 实际的评论内容部分
-    pattern = re.compile('<span class="ctt">(.*?)<\/span>', re.S)
+    pattern = re.compile('<div class="c"( .*?)<\/div>', re.S)
     matched_all = re.findall(pattern, html)
     for matched in matched_all:
         # 用正则表达式 match 评论内容部分中的语句，存入result.txt
-        comment_pattern = re.compile('>@(.*)<\/a>:*(.*)', re.S)
-        comment_match = re.findall(comment_pattern, matched)
-        line = matched if len(comment_match) == 0 else comment_match[0][0] + ': ' + comment_match[0][1]
-        print('抓取内容: ' + line)
+        # match 评论用户
+        user_match = re.findall(re.compile('<a href="[a-zA-Z0-9:\/.]*">(.*?)<\/a>', re.S), matched)
+        line = ""
+        if len(user_match) == 1:
+            line += user_match[0] + ': '
+        # match 评论内容
+        comment_match = re.findall(re.compile('<span class="ctt">(.*?)<\/span>', re.S), matched)
+        if len(comment_match) == 1:
+            line += comment_match[0] + ' '
+        # match 评论时间
+        time_match = re.findall(re.compile('<span class="ct">(.*?)&nbsp', re.S), matched)
+        if len(time_match) == 1:
+            line += time_match[0]
+        print(line)
         with open('result.txt', 'a', encoding='utf-8') as fp:
             fp.writelines(str(line) + '\n')
 
