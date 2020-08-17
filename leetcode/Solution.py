@@ -2,20 +2,25 @@ from typing import List
 
 
 class Solution:
-    def plusOne(self, digits: List[int]) -> List[int]:
-        add_one = 1
-        for index in range(len(digits) - 1, -1, -1):
-            current = digits[index] + add_one
-            if current < 10:
-                digits[index] = current
-                add_one = 0
-            else:
-                digits[index] = 0
-                add_one = 1
-        if add_one == 1:
-            digits.insert(0, add_one)
-        return digits
+
+    def __init__(self):
+        self.result = float("inf")
+
+    def findMin(self, nums: List[int]) -> int:
+        self.bin_dfs(nums, 0, len(nums) - 1)
+        return self.result
+
+    def bin_dfs(self, nums, start, end):
+        if end - start <= 1:
+            self.result = min(nums[start], nums[end], self.result)
+            return
+
+        mid = (start + end) // 2
+        if nums[end] <= nums[mid]:
+            self.bin_dfs(nums, mid + 1, end)
+        if nums[end] >= nums[mid]:
+            self.bin_dfs(nums, start, mid)
 
 
 if __name__ == '__main__':
-    print(Solution().plusOne([9, 9]))
+    print(Solution().findMin([4, 5, 6, 7, 7, 0, 0, 1, 2]))

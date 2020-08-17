@@ -6,6 +6,8 @@ from pathlib import Path
 
 import requests
 
+from scraper import WordCloudGenerator
+
 
 def get_one_page(url):
     """
@@ -47,7 +49,14 @@ def parse_one_page(html):
         # match 评论内容
         comment_match = re.findall(re.compile('<span class="ctt">(.*?)<\/span>', re.S), matched)
         if len(comment_match) == 1:
-            line += comment_match[0] + ' '
+            if comment_match[0].startswith("回复"):
+                result = re.findall(re.compile(
+                    '回复<a href="[a-zA-Z0-9:\/.%]*">(.*?)<\/a>\:(<a href="[a-zA-Z0-9:\/.%]*">(.*?)<\/a>|(.*))', re.S),
+                                    comment_match[0])
+                if len(result) > 0 and len(result[0]) >= 4:
+                    line += result[0][2] + result[0][3] + ' '
+            else:
+                line += comment_match[0] + ' '
         # match 评论时间
         time_match = re.findall(re.compile('<span class="ct">(.*?)&nbsp', re.S), matched)
         if len(time_match) == 1:
@@ -78,3 +87,7 @@ if __name__ == '__main__':
             print('正在爬取第 %d 页评论' % page)
             parse_one_page(html)
             time.sleep(3)
+
+    # 生成词云，传入数据所在txt文件
+    WordCloudGenerator.cut_scraped_word('result.txt')
+    WordCloudGenerator.generate_word_cloud()
