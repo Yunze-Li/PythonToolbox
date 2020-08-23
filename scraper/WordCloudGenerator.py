@@ -56,3 +56,9 @@ def generate_word_cloud():
     image.show()
     # 保存词云图片
     wc.to_file('cloud.png')
+
+
+if __name__ == '__main__':
+    # 生成词云，传入数据所在txt文件
+    cut_scraped_word('tongzhuo.txt')
+    generate_word_cloud()
