@@ -1,12 +1,12 @@
 import jieba
-import numpy
-from PIL import Image
 from wordcloud import WordCloud
+
+from scraper.constants import FONT_PATH, STOP_WORDS_PATH
 
 
 def cut_scraped_word(file_name: str):
     stop_words = []
-    with open('stop_words.txt', 'r', encoding='utf-8') as f:
+    with open(STOP_WORDS_PATH, 'r', encoding='utf-8') as f:
         lines = f.readlines()
         for line in lines:
             stop_words.append(line.strip())
@@ -29,21 +29,17 @@ def is_all_chinese(word: str):
     return True
 
 
-def generate_word_cloud():
-    # 打开词云背景图
-    cloud_mask = numpy.array(Image.open('bg.png'))
+def generate_word_cloud(generate_file_path: str):
     # 定义词云的一些属性
     wc = WordCloud(
         # 背景图分割颜色为白色
         background_color='white',
         # 统计搭配词设置关闭（避免重复关键词）
         collocations=False,
-        # 背景图样
-        mask=cloud_mask,
         # 显示最大词数
         max_words=300,
         # 显示中文
-        font_path='SimHei.ttf',
+        font_path=FONT_PATH,
         # 最大尺寸
         max_font_size=100
     )
@@ -55,10 +51,4 @@ def generate_word_cloud():
     # 展示词云图片
     image.show()
     # 保存词云图片
-    wc.to_file('cloud.png')
-
-
-if __name__ == '__main__':
-    # 生成词云，传入数据所在txt文件
-    cut_scraped_word('tongzhuo.txt')
-    generate_word_cloud()
+    wc.to_file(generate_file_path)

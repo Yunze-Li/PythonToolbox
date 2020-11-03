@@ -7,6 +7,7 @@ from pathlib import Path
 import requests
 
 from scraper import WordCloudGenerator
+from scraper.constants import RESULT_PATH, WORD_CLOUD_PATH, YOUR_COOKIE
 
 
 def get_one_page(url):
@@ -22,7 +23,7 @@ def get_one_page(url):
         'Accept': 'text/html,application/xhtml+xml,application/xml;q=0.9,image/webp,image/apng,*/*;q=0.8,application/signed-exchange;v=b3;q=0.9',
         'Accept-Language': 'en-US,en;q=0.9,zh-CN;q=0.8,zh;q=0.7,zh-TW;q=0.6',
         'Accept-Encoding': 'gzip, deflate, br',
-        'Cookie': 'NOTE: PLEASE REPLACED WITH YOUR COOKIE HERE!!!'
+        'Cookie': YOUR_COOKIE
     }
     # 利用requests.get命令获取网页html
     response = requests.get(url, headers=headers, verify=False)
@@ -40,19 +41,19 @@ def parse_one_page(html):
     pattern = re.compile('<div class="c"( .*?)<\/div>', re.S)
     matched_all = re.findall(pattern, html)
     for matched in matched_all:
+        line = ""
         # 用正则表达式 match 评论内容部分中的语句，存入result.txt
         # match 评论用户
-        user_match = re.findall(re.compile('<a href="[a-zA-Z0-9:\/.]*">(.*?)<\/a>', re.S), matched)
-        line = ""
-        if len(user_match) == 1:
-            line += user_match[0] + ': '
+        # user_match = re.findall(re.compile('<a href="[a-zA-Z0-9:\/.]*">(.*?)<\/a>', re.S), matched)
+        # if len(user_match) == 1:
+        #     line += user_match[0] + ': '
         # match 评论内容
         comment_match = re.findall(re.compile('<span class="ctt">(.*?)<\/span>', re.S), matched)
         if len(comment_match) == 1:
             if comment_match[0].startswith("回复"):
                 result = re.findall(re.compile(
                     '回复<a href="[a-zA-Z0-9:\/.%]*">(.*?)<\/a>\:(<a href="[a-zA-Z0-9:\/.%]*">(.*?)<\/a>|(.*))', re.S),
-                                    comment_match[0])
+                    comment_match[0])
                 if len(result) > 0 and len(result[0]) >= 4:
                     line += result[0][2] + result[0][3] + ' '
             else:
@@ -62,15 +63,15 @@ def parse_one_page(html):
         if len(time_match) == 1:
             line += time_match[0]
         print(line)
-        with open('result.txt', 'a', encoding='utf-8') as fp:
+        with open(RESULT_PATH, 'a', encoding='utf-8') as fp:
             fp.writelines(str(line) + '\n')
 
 
 if __name__ == '__main__':
     # 删除result.txt文件（如果存在）
-    result_file = Path('result.txt')
+    result_file = Path(RESULT_PATH)
     if result_file.is_file():
-        os.remove('result.txt')
+        os.remove(RESULT_PATH)
 
     # 默认 抓取30页 可以传入初始参数调整, 比如如果抓取100页就用：
     # python3 WeiboScraper.py 100
@@ -78,7 +79,7 @@ if __name__ == '__main__':
 
     # 开始抓取
     for page in range(1, page_scraped):
-        url = "https://weibo.cn/comment/J5UeFfDJC?&page=" + str(page)
+        url = "https://weibo.cn/comment/Jqew3ejKH?uid=1496814565&rl=1&page=" + str(page)
         html = get_one_page(url)
         if html is None:
             print('爬取失败，内容为空！')
@@ -89,5 +90,5 @@ if __name__ == '__main__':
             time.sleep(3)
 
     # 生成词云，传入数据所在txt文件
-    WordCloudGenerator.cut_scraped_word('result.txt')
-    WordCloudGenerator.generate_word_cloud()
+    WordCloudGenerator.cut_scraped_word(RESULT_PATH)
+    WordCloudGenerator.generate_word_cloud(WORD_CLOUD_PATH)
