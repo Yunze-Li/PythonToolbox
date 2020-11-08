@@ -2,4 +2,5 @@
 /kindleComicPush/constants
 *.txt
 *.png
+*.xls
 !stop_words.txt
