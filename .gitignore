@@ -1,4 +1,5 @@
 /.idea
 /kindleComicPush/constants
 *.txt
+*.png
 !stop_words.txt

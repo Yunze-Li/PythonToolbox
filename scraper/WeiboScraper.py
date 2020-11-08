@@ -1,8 +1,6 @@
-import os
 import re
 import sys
 import time
-from pathlib import Path
 
 import requests
 
@@ -42,52 +40,44 @@ def parse_one_page(html):
     matched_all = re.findall(pattern, html)
     for matched in matched_all:
         line = ""
-        # 用正则表达式 match 评论内容部分中的语句，存入result.txt
-        # match 评论用户
-        # user_match = re.findall(re.compile('<a href="[a-zA-Z0-9:\/.]*">(.*?)<\/a>', re.S), matched)
-        # if len(user_match) == 1:
-        #     line += user_match[0] + ': '
-        # match 评论内容
-        comment_match = re.findall(re.compile('<span class="ctt">(.*?)<\/span>', re.S), matched)
-        if len(comment_match) == 1:
-            if comment_match[0].startswith("回复"):
-                result = re.findall(re.compile(
-                    '回复<a href="[a-zA-Z0-9:\/.%]*">(.*?)<\/a>\:(<a href="[a-zA-Z0-9:\/.%]*">(.*?)<\/a>|(.*))', re.S),
-                    comment_match[0])
-                if len(result) > 0 and len(result[0]) >= 4:
-                    line += result[0][2] + result[0][3] + ' '
-            else:
-                line += comment_match[0] + ' '
+        matched_comment = re.findall(re.compile('<span class=\"ctt\">(.*?<\/span>)', re.S), matched)
+        if len(matched_comment) == 1:
+            matched_comment_content = matched_comment[0]
+            if matched_comment[0].startswith("回复"):
+                matched_comment_content = re.findall(re.compile('<\/a>:(.*?)<\/span>', re.S), matched_comment[0])[0]
+            matched_comment_content_chinese = re.findall(re.compile('([^\x00-\xff]+)', re.S), matched_comment_content)
+            for content in matched_comment_content_chinese:
+                line += content + ' '
         # match 评论时间
-        time_match = re.findall(re.compile('<span class="ct">(.*?)&nbsp', re.S), matched)
-        if len(time_match) == 1:
-            line += time_match[0]
+        matched_comment_time = re.findall(re.compile('<span class=\"ct\">(.*?)(&nbsp|<\/span>)', re.S), matched)
+        if len(matched_comment_time) == 1:
+            line += matched_comment_time[0][0]
         print(line)
         with open(RESULT_PATH, 'a', encoding='utf-8') as fp:
             fp.writelines(str(line) + '\n')
 
 
 if __name__ == '__main__':
-    # 删除result.txt文件（如果存在）
-    result_file = Path(RESULT_PATH)
-    if result_file.is_file():
-        os.remove(RESULT_PATH)
+    # 从urls.txt读取网址信息
+    urls_file = open('data/urls.txt', 'r')
+    urls = urls_file.readlines()
 
     # 默认 抓取30页 可以传入初始参数调整, 比如如果抓取100页就用：
     # python3 WeiboScraper.py 100
-    page_scraped = 30 if len(sys.argv) != 2 else sys.argv[1]
+    page_scraped = 30 if len(sys.argv) != 2 else int(sys.argv[1])
 
     # 开始抓取
-    for page in range(1, page_scraped):
-        url = "https://weibo.cn/comment/Jqew3ejKH?uid=1496814565&rl=1&page=" + str(page)
-        html = get_one_page(url)
-        if html is None:
-            print('爬取失败，内容为空！')
-            break
-        else:
-            print('正在爬取第 %d 页评论' % page)
-            parse_one_page(html)
-            time.sleep(3)
+    for base_url in urls:
+        for page in range(1, page_scraped):
+            url = base_url.strip("\n") + str(page)
+            html = get_one_page(url)
+            if html is None:
+                print('爬取失败，内容为空！')
+                break
+            else:
+                print('正在爬取第 %d 页评论' % page)
+                parse_one_page(html)
+                time.sleep(3)
 
     # 生成词云，传入数据所在txt文件
     WordCloudGenerator.cut_scraped_word(RESULT_PATH)
