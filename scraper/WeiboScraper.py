@@ -4,18 +4,25 @@ import sys
 import time
 from pathlib import Path
 
+import jieba
 import pandas as pd
 import requests
+from wordcloud import WordCloud
 
-from scraper import WordCloudGenerator
-from scraper.constants import COMMENT_CONTENT_COLUMN
-from scraper.constants import COMMENT_TIME_COLUMN
-from scraper.constants import EXCEL_OUTPUT_PATH
-from scraper.constants import RESULT_PATH
-from scraper.constants import SHEET_NAME
-from scraper.constants import WORD_CLOUD_PATH
-from scraper.constants import YOUR_COOKIE
+RESULT_PATH = 'data/result.txt'
+STOP_WORDS_PATH = 'data/stop_words.txt'
+URLS_PATH = 'data/urls.txt'
+WORD_CLOUD_PATH = 'data/word_cloud.png'
+EXCEL_OUTPUT_PATH = 'data/result.xls'
 
+FONT_PATH = 'font/SimHei.ttf'
+
+COMMENT_CONTENT_COLUMN = '评论内容'
+COMMENT_TIME_COLUMN = '评论时间'
+SHEET_NAME = '微博评论截取'
+
+# 在这里改成你的Cookie
+YOUR_COOKIE = 'SUB=_2A25yPn53DeRhGedI6VAV8SjEzTyIHXVRwQI_rDV6PUJbkdANLW2gkW1NV9FYfQFeyi1AnfnMjIvCSII9r_zlXr2Z; SUHB=0G0fB-QQPwe7EE; SCF=AlYHsXogIiV0HDS-PyxthZkqWFXTXE7uR8VqXQclcc-dhZSttJe3kNlqiV5MKnXDEnB-L_xzFmHx_UfxnMZDLm4.; _T_WM=1e7f68277ef7f3583600924a356ec041'
 writer = pd.ExcelWriter(EXCEL_OUTPUT_PATH, engine='xlsxwriter')
 
 
@@ -77,6 +84,56 @@ def parse_one_page(html, result_dict):
             fp.writelines(str(line) + '\n')
 
 
+def cut_scraped_word(file_name: str):
+    stop_words = []
+    with open(STOP_WORDS_PATH, 'r', encoding='utf-8') as f:
+        lines = f.readlines()
+        for line in lines:
+            stop_words.append(line.strip())
+    content = open(file_name, 'rb').read()
+    # jieba 分词
+    word_list = jieba.cut(content)
+    words = []
+    for word in word_list:
+        if word not in stop_words and is_all_chinese(word):
+            words.append(word)
+    global word_cloud
+    # 用逗号隔开词语
+    word_cloud = '，'.join(words)
+
+
+def is_all_chinese(word: str):
+    for char in word:
+        if not '\u4e00' <= char <= '\u9fa5':
+            return False
+    return True
+
+
+def generate_word_cloud(generate_file_path: str):
+    # 定义词云的一些属性
+    wc = WordCloud(
+        # 背景图分割颜色为白色
+        background_color='white',
+        # 统计搭配词设置关闭（避免重复关键词）
+        collocations=False,
+        # 显示最大词数
+        max_words=300,
+        # 显示中文
+        font_path=FONT_PATH,
+        # 最大尺寸
+        max_font_size=100
+    )
+    global word_cloud
+    # 词云函数
+    x = wc.generate(word_cloud)
+    # 生成词云图片
+    image = x.to_image()
+    # 展示词云图片
+    image.show()
+    # 保存词云图片
+    wc.to_file(generate_file_path)
+
+
 if __name__ == '__main__':
     # 删除result.txt文件和result.xls文件（如果存在）
     result_file = Path(RESULT_PATH)
@@ -114,5 +171,5 @@ if __name__ == '__main__':
     writer.save()
 
     # 生成词云，传入数据所在txt文件
-    WordCloudGenerator.cut_scraped_word(RESULT_PATH)
-    WordCloudGenerator.generate_word_cloud(WORD_CLOUD_PATH)
+    cut_scraped_word(RESULT_PATH)
+    generate_word_cloud(WORD_CLOUD_PATH)
