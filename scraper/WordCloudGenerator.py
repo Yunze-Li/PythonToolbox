@@ -4,7 +4,7 @@ from pathlib import Path
 import jieba
 from wordcloud import WordCloud
 
-SCRAPED_PATH = 'data/scraped.txt'
+RESULT_PATH = 'data/result.txt'
 STOP_WORDS_PATH = 'data/stop_words.txt'
 WORD_CLOUD_PATH = 'data/word_cloud.png'
 FREQUENCY_OUTPUT_PATH = 'data/frequency.txt'
@@ -74,11 +74,11 @@ def generate_word_cloud(generate_file_path: str):
 
 
 if __name__ == '__main__':
-    # 删frequency.txt文件和result.xls文件（如果存在）
+    # 删frequency.txt文件（如果存在）
     frequency_file = Path(FREQUENCY_OUTPUT_PATH)
     if frequency_file.is_file():
         os.remove(FREQUENCY_OUTPUT_PATH)
 
     # 生成词云，传入数据所在txt文件
-    cut_scraped_word(SCRAPED_PATH)
+    cut_scraped_word(RESULT_PATH)
     generate_word_cloud(WORD_CLOUD_PATH)
