@@ -14,6 +14,7 @@ STOP_WORDS_PATH = 'data/stop_words.txt'
 URLS_PATH = 'data/urls.txt'
 WORD_CLOUD_PATH = 'data/word_cloud.png'
 EXCEL_OUTPUT_PATH = 'data/result.xls'
+FREQUENCY_OUTPUT_PATH = 'data/frequency.txt'
 
 FONT_PATH = 'font/SimHei.ttf'
 
@@ -94,9 +95,20 @@ def cut_scraped_word(file_name: str):
     # jieba 分词
     word_list = jieba.cut(content)
     words = []
+    word_dict = {}
     for word in word_list:
         if word not in stop_words and is_all_chinese(word):
             words.append(word)
+            if word in word_dict:
+                word_dict[word] = word_dict[word] + 1
+            else:
+                word_dict[word] = 1
+    # 统计词频，按高频到低频写入frequency.txt文件
+    word_dict_sorted = {k: v for k, v in sorted(word_dict.items(), key=lambda item: item[1], reverse=True)}
+    for key in word_dict_sorted.keys():
+        with open(FREQUENCY_OUTPUT_PATH, 'a', encoding='utf-8') as fp:
+            fp.writelines(f"{key}: {word_dict[key]}" + '\n')
+
     global word_cloud
     # 用逗号隔开词语
     word_cloud = '，'.join(words)
@@ -135,13 +147,16 @@ def generate_word_cloud(generate_file_path: str):
 
 
 if __name__ == '__main__':
-    # 删除result.txt文件和result.xls文件（如果存在）
+    # 删除result.txt文件，result.xls文件和frequency.txt文件（如果存在）
     result_file = Path(RESULT_PATH)
     if result_file.is_file():
         os.remove(RESULT_PATH)
     excel_result_file = Path(EXCEL_OUTPUT_PATH)
     if excel_result_file.is_file():
         os.remove(EXCEL_OUTPUT_PATH)
+    frequency_file = Path(FREQUENCY_OUTPUT_PATH)
+    if frequency_file.is_file():
+        os.remove(FREQUENCY_OUTPUT_PATH)
 
     # 从urls.txt读取网址信息
     urls_file = open('data/urls.txt', 'r')
